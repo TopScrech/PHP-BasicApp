@@ -36,7 +36,7 @@ try {
         sendError('No user was affected', __LINE__);
     }
 
-    echo '{"status": 1, "message": "user updated"}';
+    echo '{"status": 1, "message": "user name updated"}';
     exit();
 } catch(PDOException $ex) {
     sendError("cannot create user", __LINE__);
