@@ -26,5 +26,3 @@ try {
 } catch(PDOException $ex) {
     sendError('error executing query', __LINE__);
 }
-
-echo '{"status": 0, "data": {"id": 1, "name": "Goida"}}';
