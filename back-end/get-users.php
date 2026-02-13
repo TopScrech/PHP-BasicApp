@@ -1,5 +1,5 @@
 <?php
-
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
 // The next line replaces itself with database.php
