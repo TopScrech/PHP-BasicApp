@@ -1,7 +1,7 @@
-<script>
-    import {users} from './data-users.js'
-    export let user = {}
+<script lang="ts">
+    export let user: { id: number, name: string, picture_name: string }
     const imgPath = 'http://localhost:8888/back-end/pictures/'
+    let txtFile: HTMLInputElement
 
     const updateName = async() => {
         const updateRoute = 'http://localhost:8888/back-end/update-user-name.php?id=' + user.id
@@ -18,6 +18,36 @@
 
         console.log(res)
     }
+
+    const updateImage = async() => {
+        const file = txtFile?.files?.[0]
+        if(!file) return
+
+        const updateRoute = 'http://localhost:8888/back-end/update-user-picture.php?id=' + user.id
+        console.log(updateRoute)
+
+        const data = new FormData()
+        data.append('picture', file)
+
+        const res = await fetch(updateRoute, {
+            method: 'POST',
+            body: data
+        })
+
+        let payload
+        try {
+            payload = await res.json()
+        } catch {
+            return
+        }
+        console.log(payload)
+
+        if(!res.ok || !payload?.status || !payload?.picture_name) {
+            return
+        }
+
+        user.picture_name = payload.picture_name
+    }
 </script>
 
 <div class="user">
@@ -25,7 +55,9 @@
     <input type="text" bind:value={user.name} on:input={updateName}>
 
     <label for="picture{user.id}">
-        <img src={imgPath}{user.picture_name}>
+        <input type="file" bind:this={txtFile} name="picture{user.id}" id="picture{user.id}" on:change={updateImage}>
+
+        <img src={`${imgPath}${user.picture_name}`} alt={user.name}>
     </label>
 </div>
 
@@ -44,11 +76,6 @@
         outline: none;
         color: white;
         font-size: inherit;
-        background-color: transparent;
-    }
-    button{
-        outline: none;
-        border: none;
         background-color: transparent;
     }
     input[type="file"]{

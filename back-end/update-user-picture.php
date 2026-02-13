@@ -15,13 +15,11 @@ if(!isset($_FILES['picture'])) {
     sendError('Picture missing', __LINE__);
 }
 
-var_dump($_FILES['picture']);
-//name 37971E01-C900-40D6-9559-17852B100245_under1mb_q100 copy.jpg
-// type image/jpeg
-// tmp_name /Applications/MAMP/tmp/php/php5oNiEE
-// size 1040677 B
+if($_FILES['picture']['error'] !== UPLOAD_ERR_OK) {
+    sendError('Picture upload failed', __LINE__);
+}
 
-$extension = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION); // jpg
+$extension = strtolower(pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION)); // jpg
 
 $allowedExtensions = array("jpg", "jpeg", "png", "gif", "heic", "heif");
 
@@ -37,7 +35,16 @@ if($_FILES['picture']['size'] > 5000000) {
 $uniqueName = bin2hex(random_bytes(16)); // 32 chars
 $uniqueName .= '.'.$extension; // c688ab69771aa1becbd5081104cb2bbe.jpg
 
-echo $uniqueName;
+$destinationFolder = __DIR__.'/pictures/';
+$finalPath = $destinationFolder.$uniqueName;
+
+if(!is_dir($destinationFolder)) {
+    mkdir($destinationFolder, 0777, true);
+}
+
+if(!move_uploaded_file($_FILES['picture']['tmp_name'], $finalPath)) {
+    sendError('Cannot move uploaded file', __LINE__);
+}
 
 require_once(__DIR__.'/protected/database.php');
 
@@ -49,19 +56,20 @@ try {
     $query->bindValue(':id', $_GET['id']);
     $query->execute();
 
-    if(!$query->rowCount($_FILES['picture']['tmp_name'], )) {
+    if(!$query->rowCount()) {
+        if(file_exists($finalPath)) {
+            unlink($finalPath);
+        }
         sendError('No user was affected', __LINE__);
     }
 
-    $destinationFolder = __DIR__.'/pictures/';
-    $finalPath = $destinationFolder.$uniqueName;
-
-    move_uploaded_file($_FILES['picture']['tmp_name'], $finalPath);
-
-    echo '{"status": 1, "message": "user pic updated"}';
+    echo '{"status": 1, "message": "user pic updated", "picture_name": "'.$uniqueName.'"}';
     exit();
 } catch(PDOException $ex) {
-    sendError("cannot create user", __LINE__);
+    if(file_exists($finalPath)) {
+        unlink($finalPath);
+    }
+    sendError("cannot update user picture", __LINE__);
 }
 
 exit();

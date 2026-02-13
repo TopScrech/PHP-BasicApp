@@ -1,14 +1,14 @@
-<script>
+<script lang="ts">
     import {users} from './data-users.js'
     import {onMount} from "svelte";
     import User from './User.svelte'
 
     onMount(async() => {
         const url = 'http://localhost:8888/back-end/get-users.php'
-        let res = await fetch(url)
-        res = await res.json()
-        console.log(res)
-        $users = res.data
+        const res = await fetch(url)
+        const payload = await res.json()
+        console.log(payload)
+        $users = payload?.data ?? []
     })
 </script>
 
