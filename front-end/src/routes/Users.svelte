@@ -8,8 +8,7 @@
         let res = await fetch(url)
         res = await res.json()
         console.log(res)
-        let data = res.data
-        $users = data
+        $users = res.data
     })
 </script>
 
