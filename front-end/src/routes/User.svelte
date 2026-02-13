@@ -1,4 +1,6 @@
 <script lang="ts">
+    import {users} from "./data-users";
+
     export let user: { id: number, name: string, picture_name: string }
     const imgPath = 'http://localhost:8888/back-end/pictures/'
     let txtFile: HTMLInputElement
@@ -17,6 +19,21 @@
         })
 
         console.log(res)
+    }
+
+    const deleteUser = async() => {
+        const deleteRoute = 'http://localhost:8888/back-end/remove-user.php?id=' + user.id
+
+        const res = await fetch(deleteRoute)
+        const payload = await res.json()
+
+        if(!res.ok || !payload?.status) {
+            return
+        }
+
+        $users = $users.filter(
+            (item: { id: number }) => user.id != item.id
+        )
     }
 
     const updateImage = async() => {
@@ -59,6 +76,10 @@
 
         <img src={`${imgPath}${user.picture_name}`} alt={user.name}>
     </label>
+
+    <button on:click={deleteUser}>
+        Delete
+    </button>
 </div>
 
 <style>
